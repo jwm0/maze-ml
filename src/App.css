@@ -1,0 +1,9 @@
+.App {
+}
+
+.goal {
+  position: absolute;
+  background-color: yellow;
+  height: 5px;
+  width: 5px;
+}
