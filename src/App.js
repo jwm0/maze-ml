@@ -6,14 +6,21 @@ import './App.css';
 const WIDTH = 400;
 const HEIGHT = 400;
 const GOAL = { x: 50, y: 180 };
+const OBSTACLE = [
+  [80, 150],
+  [150, 150],
+  [150, 300],
+  [80, 300],
+];
 
 class App extends Component {
   state = {
     generation: 0,
     finished: false,
-    populationSize: 1000,
+    populationSize: 100,
     dotPositions: [],
     minStep: 1000,
+    renderAll: true,
   }
   dots = [];
 
@@ -23,7 +30,7 @@ class App extends Component {
       this.dots[i] = new Dot(WIDTH, HEIGHT, GOAL);
       dotPositions[i] = this.dots[i].pos;
     }
-    this.setState({ dotPositions });
+    this.setState({ dots: this.dots });
   }
 
   calculateFitness() {
@@ -102,11 +109,6 @@ class App extends Component {
     this.setBestDot();
     this.calculateFitnessSum();
 
-    // INFO
-    // getChild methos and mutation works
-    // something funky with selecting parents going on
-    // probably reference issue
-
     //the champion lives on
     newDots[0] = this.dots[this.bestDot].getChild();
     newDots[0].isBest = true;
@@ -120,14 +122,13 @@ class App extends Component {
     // calculate new pos
     let dotPositions = [];
     for (let i = 0; i < this.state.populationSize; i++) {
-      // console.log(this.dots[i].brain.id);
       dotPositions[i] = this.dots[i].pos;
     }
 
     this.setState((state) => ({
       generation: state.generation + 1,
       dotPositions,
-    }))
+    }), () => this.startAnimation());
   }
 
   startAnimation = () => {
@@ -135,10 +136,11 @@ class App extends Component {
       if (this.allDotsDead()) {
         clearInterval(this.animation);
         this.calculateFitness();
+        this.nextGeneration();
       }
 
       return this.move();
-    }, 25);
+    }, 100);
   }
 
   pauseAnimation = () => {
@@ -152,16 +154,22 @@ class App extends Component {
   move = () => {
     let dotPositions = [];
     for (let i = 0; i < this.state.populationSize; i++) {
-      // if (this.dots[i].brain.step > this.state.minStep) {
-      //   this.dots[i].dead = true;
-      // } else {
-      //   this.dots[i].update();
-      //   dotPositions[i] = this.dots[i].pos;
-      // }
+      if (this.dots[i].brain.step > this.state.minStep) {
+        this.dots[i].dead = true;
+      } else {
+        this.dots[i].update();
+        dotPositions[i] = this.dots[i].pos;
+      }
       this.dots[i].update();
       dotPositions[i] = this.dots[i].pos;
     }
-    this.setState({ dotPositions });
+    this.setState({ dots: this.dots });
+  }
+
+  showBest = () => {
+    this.setState((state) => ({
+      renderAll: !state.renderAll,
+    }));
   }
 
   render() {
@@ -170,13 +178,16 @@ class App extends Component {
         <Canvas
           width={WIDTH}
           height={HEIGHT}
-          dots={this.state.dotPositions}
+          dots={this.state.dots || []}
           goal={GOAL}
+          obstacles={[OBSTACLE]}
+          renderAll={this.state.renderAll}
         />
         <button type="button" onClick={this.startAnimation}>start</button>
         <button type="button" onClick={this.pauseAnimation}>pause</button>
         <span>{this.state.generation}</span>
         <button type="button" onClick={this.nextGeneration}>new generation</button>
+        <button type="button" onClick={this.showBest}>toggle population</button>
       </div>
     );
   }
