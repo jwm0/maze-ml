@@ -1,17 +1,6 @@
 import React from 'react';
-import inside from 'point-in-polygon';
 
 class Canvas extends React.PureComponent {
-  isDead = (dot) => {
-    const coordinates = [ dot.pos.x, dot.pos.y ];
-
-    this.props.obstacles.forEach((obstacle) => {
-      if (inside(coordinates, obstacle)) {
-        dot.dead = true;
-        return;
-      }
-    })
-  }
   render() {
     const { width, height, dots, goal, obstacles } = this.props;
 
@@ -39,11 +28,9 @@ class Canvas extends React.PureComponent {
           this.props.renderAll ?
           dots.map((dot, i) => {
           const isBest = i === 0;
-          this.isDead(dot);
-          return (<circle key={i} cx={dot.pos.x} cy={dot.pos.y} r="5" fill={isBest ? 'green' : 'blue'}/>)
-        }
-        ) :
-        <circle cx={this.props.dots[0].pos.x} cy={this.props.dots[0].pos.y} r="5" fill="green"/>
+          return <circle key={i} cx={dot.pos.x} cy={dot.pos.y} r="5" fill={isBest ? 'green' : 'blue'}/>
+          }) :
+          <circle cx={dots[0].pos.x} cy={dots[0].pos.y} r="5" fill="green"/>
         }
         <defs>
           <pattern id="smallGrid" width="10" height="10" patternUnits="userSpaceOnUse">

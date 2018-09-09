@@ -31,8 +31,7 @@ class Brain {
   }
 
   //mutates the brain by setting some of the directions to random vectors
-  mutate() {
-    const mutationRate = 0.1; //chance that any vector in directions gets changed
+  mutate(mutationRate = 0.01) {
     for (let i = 0; i< this.directions.length; i++) {
       const rand = Math.random();
       if (rand < mutationRate) {

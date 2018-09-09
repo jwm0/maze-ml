@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import inside from 'point-in-polygon';
+
 import Dot from './classes/Dot';
 import Canvas from './components/Canvas';
 import './App.css';
@@ -8,19 +10,27 @@ const HEIGHT = 400;
 const GOAL = { x: 50, y: 180 };
 const OBSTACLE = [
   [80, 150],
-  [150, 150],
-  [150, 300],
-  [80, 300],
+  [100, 150],
+  [100, 400],
+  [80, 400],
 ];
+
+const OBSTACLE2 = [
+  [150, 0],
+  [170, 0],
+  [170, 300],
+  [150, 300],
+]
 
 class App extends Component {
   state = {
     generation: 0,
-    finished: false,
-    populationSize: 100,
+    mutationRate: 0.01,
+    populationSize: 1000,
     dotPositions: [],
     minStep: 1000,
     renderAll: true,
+    obstacles: [OBSTACLE, OBSTACLE2],
   }
   dots = [];
 
@@ -78,7 +88,7 @@ class App extends Component {
   //mutates all the brains of the babies
   mutateChildren() {
     for (let i = 1; i< this.dots.length; i++) {
-      this.dots[i].brain.mutate();
+      this.dots[i].brain.mutate(this.state.mutationRate);
     }
   }
 
@@ -140,7 +150,7 @@ class App extends Component {
       }
 
       return this.move();
-    }, 100);
+    }, 10);
   }
 
   pauseAnimation = () => {
@@ -156,6 +166,15 @@ class App extends Component {
     for (let i = 0; i < this.state.populationSize; i++) {
       if (this.dots[i].brain.step > this.state.minStep) {
         this.dots[i].dead = true;
+      } else if (this.state.obstacles) {
+        const coordinates = [ this.dots[i].pos.x, this.dots[i].pos.y ];
+
+        this.state.obstacles.forEach((obstacle) => {
+          if (inside(coordinates, obstacle)) {
+            this.dots[i].dead = true;
+            return;
+          }
+        });
       } else {
         this.dots[i].update();
         dotPositions[i] = this.dots[i].pos;
@@ -172,6 +191,13 @@ class App extends Component {
     }));
   }
 
+  handleChange = (e) => {
+    const { name, value } = e.target;
+    this.setState({
+      [name]: value,
+    })
+  }
+
   render() {
     return (
       <div className="App">
@@ -180,7 +206,8 @@ class App extends Component {
           height={HEIGHT}
           dots={this.state.dots || []}
           goal={GOAL}
-          obstacles={[OBSTACLE]}
+          // TODO: change to state
+          obstacles={[OBSTACLE, OBSTACLE2]}
           renderAll={this.state.renderAll}
         />
         <button type="button" onClick={this.startAnimation}>start</button>
@@ -188,6 +215,13 @@ class App extends Component {
         <span>{this.state.generation}</span>
         <button type="button" onClick={this.nextGeneration}>new generation</button>
         <button type="button" onClick={this.showBest}>toggle population</button>
+        <input
+          name="mutationRate"
+          type="number"
+          step="0.005"
+          value={this.state.mutationRate}
+          onChange={this.handleChange}
+        />
       </div>
     );
   }

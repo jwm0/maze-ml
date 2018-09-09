@@ -1,9 +1,6 @@
 import Brain from '../classes/Brain';
 import Vector from '../classes/Vector';
 
-import * as _ from 'lodash';
-
-
 class Dot {
   constructor(width, height, goal) {
     this.width = width;
