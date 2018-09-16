@@ -27,8 +27,8 @@ class Canvas extends React.PureComponent {
         {
           this.props.renderAll ?
           dots.map((dot, i) => {
-          const isBest = i === 0;
-          return <circle key={i} cx={dot.pos.x} cy={dot.pos.y} r="5" fill={isBest ? 'green' : 'blue'}/>
+            const isBest = dot.isBest;
+            return <circle key={i} cx={dot.pos.x} cy={dot.pos.y} r="5" fill={isBest ? 'green' : 'blue'}/>
           }) :
           <circle cx={dots[0].pos.x} cy={dots[0].pos.y} r="5" fill="green"/>
         }

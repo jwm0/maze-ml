@@ -18,29 +18,40 @@ const OBSTACLE = [
 const OBSTACLE2 = [
   [150, 0],
   [170, 0],
-  [170, 300],
-  [150, 300],
-]
+  [250, 300],
+  [200, 300],
+];
+
+const OBSTACLE3 = [
+  [250, 400],
+  [300, 400],
+  [350, 150],
+];
 
 class App extends Component {
-  state = {
-    generation: 0,
-    mutationRate: 0.01,
-    populationSize: 1000,
-    dotPositions: [],
-    minStep: 1000,
-    renderAll: true,
-    obstacles: [OBSTACLE, OBSTACLE2],
-  }
-  dots = [];
+  constructor(props) {
+    super(props);
 
-  componentDidMount() {
-    let dotPositions = [];
+    this.state = {
+      animation: false,
+      generation: 0,
+      mutationRate: 0.01,
+      populationSize: 100,
+      minStep: 1000,
+      renderAll: true,
+      obstacles: [OBSTACLE, OBSTACLE2, OBSTACLE3],
+    }
+    this.dots = [];
+  }
+
+  generatePopulation = () => {
     for (let i = 0; i < this.state.populationSize; i++) {
       this.dots[i] = new Dot(WIDTH, HEIGHT, GOAL);
-      dotPositions[i] = this.dots[i].pos;
     }
-    this.setState({ dots: this.dots });
+    this.setState({
+      dots: this.dots,
+      generation: 0,
+    });
   }
 
   calculateFitness() {
@@ -142,6 +153,7 @@ class App extends Component {
   }
 
   startAnimation = () => {
+    this.setState({ animation: true });
     this.animation = setInterval(() => {
       if (this.allDotsDead()) {
         clearInterval(this.animation);
@@ -154,6 +166,7 @@ class App extends Component {
   }
 
   pauseAnimation = () => {
+    this.setState({ animation: false });
     clearInterval(this.animation);
   }
 
@@ -207,13 +220,24 @@ class App extends Component {
           dots={this.state.dots || []}
           goal={GOAL}
           // TODO: change to state
-          obstacles={[OBSTACLE, OBSTACLE2]}
+          obstacles={[OBSTACLE, OBSTACLE2, OBSTACLE3]}
           renderAll={this.state.renderAll}
         />
-        <button type="button" onClick={this.startAnimation}>start</button>
-        <button type="button" onClick={this.pauseAnimation}>pause</button>
-        <span>{this.state.generation}</span>
-        <button type="button" onClick={this.nextGeneration}>new generation</button>
+        <button
+          type="button"
+          onClick={this.state.animation ? this.pauseAnimation : this.startAnimation}
+        >
+          start/pause
+        </button>
+        <span>Generation: {this.state.generation}</span>
+        <input
+          name="populationSize"
+          type="number"
+          step="10"
+          value={this.state.populationSize}
+          onChange={this.handleChange}
+        />
+        <button type="button" onClick={this.generatePopulation}>Generate new population</button>
         <button type="button" onClick={this.showBest}>toggle population</button>
         <input
           name="mutationRate"

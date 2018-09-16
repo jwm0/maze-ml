@@ -10,7 +10,7 @@ class Dot {
     this.brain = new Brain(1000);
     this.acc = new Vector();
     this.fitness = 0;
-    this.pos = new Vector(width / 2, height / 2);
+    this.pos = new Vector(350, 350);
     this.vel = new Vector();
     this.dead = false;
     this.reachedGoal = false;
@@ -27,7 +27,7 @@ class Dot {
 
     // apply the acceleration and move the dot
     this.vel = this.vel.add(this.acc);
-      // vel.limit(5); not too fast
+    this.vel.limit(5);
     this.pos = this.pos.add(this.vel);
   }
 
