@@ -8,25 +8,6 @@ import './App.css';
 const WIDTH = 400;
 const HEIGHT = 400;
 const GOAL = { x: 50, y: 180 };
-const OBSTACLE = [
-  [80, 150],
-  [100, 150],
-  [100, 400],
-  [80, 400],
-];
-
-const OBSTACLE2 = [
-  [150, 0],
-  [170, 0],
-  [250, 300],
-  [200, 300],
-];
-
-const OBSTACLE3 = [
-  [250, 400],
-  [300, 400],
-  [350, 150],
-];
 
 class App extends Component {
   constructor(props) {
@@ -39,9 +20,15 @@ class App extends Component {
       populationSize: 100,
       minStep: 1000,
       renderAll: true,
-      obstacles: [OBSTACLE, OBSTACLE2, OBSTACLE3],
+      obstacles: [],
     }
     this.dots = [];
+  }
+
+  handleNewObstacle = (obstacle) => {
+    this.setState(state => ({
+      obstacles: [...state.obstacles, obstacle],
+    }));
   }
 
   generatePopulation = () => {
@@ -220,8 +207,9 @@ class App extends Component {
           dots={this.state.dots || []}
           goal={GOAL}
           // TODO: change to state
-          obstacles={[OBSTACLE, OBSTACLE2, OBSTACLE3]}
+          obstacles={this.state.obstacles}
           renderAll={this.state.renderAll}
+          newObstacle={this.handleNewObstacle}
         />
         <button
           type="button"

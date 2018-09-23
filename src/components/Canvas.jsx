@@ -1,17 +1,93 @@
 import React from 'react';
 
-class Canvas extends React.PureComponent {
+class Canvas extends React.Component {
+  state = {
+    polygon: [],
+  }
+
+  componentDidMount() {
+    // INFO: Event listeners for drawing new polygons
+    const canvas = document.getElementById('canvas');
+    let clicked = false;
+    let isMoving = false;
+
+    canvas.addEventListener('click', (e) => {
+      clicked = true;
+      isMoving = false;
+      this.setState(state => ({
+        polygon: [...state.polygon, [e.clientX, e.clientY]],
+      }));
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+      if (clicked) {
+        this.setState((state) => {
+          let polygon = state.polygon;
+          polygon[isMoving ? polygon.length - 1 : polygon.length] = [e.clientX, e.clientY];
+          isMoving = true;
+          return {
+            polygon,
+          }
+        });
+      }
+    });
+
+    window.addEventListener('keydown', (e) => {
+      switch (e.key) {
+        case 'Enter':
+          this.props.newObstacle(this.state.polygon);
+          clicked = false;
+          this.setState({
+            polygon: [],
+          });
+          break;
+        case 'Backspace':
+          this.setState({
+            polygon: [],
+          });
+          break;
+        default:
+          break;
+      }
+    });
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('click');
+    window.removeEventListener('mousemove');
+    window.removeEventListener('keydown');
+  }
+
+  getPathFromArray = (path) => {
+    let points = '';
+    path.forEach((pos) => {
+      points += pos.join(',') + ' ';
+    });
+
+    return points;
+  }
   render() {
     const { width, height, dots, goal, obstacles } = this.props;
 
     return (
-      <svg width={width} height={height}>
+      <svg
+        id="canvas"
+        width={width}
+        height={height}
+      >
         <circle cx={goal.x} cy={goal.y} r="5" fill="red"/>
+        {/* Drawing custom polygon */}
+        <polygon
+          points={this.getPathFromArray(this.state.polygon)}
+          style={{
+            fill: 'red',
+            stroke: '#000',
+            strokeWidth: 1,
+          }}
+        />
         {obstacles.map((obstacle, i) => {
-          let points = '';
-          obstacle.forEach((pos) => {
-            points += pos.join(',') + ' ';
-          })
+          const points = this.getPathFromArray(obstacle);
+
           return (
             <polygon
               key={i}
