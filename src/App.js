@@ -28,6 +28,7 @@ class App extends Component {
   handleNewObstacle = (obstacle) => {
     this.setState(state => ({
       obstacles: [...state.obstacles, obstacle],
+      minStep: 1000,
     }));
   }
 
@@ -38,6 +39,7 @@ class App extends Component {
     this.setState({
       dots: this.dots,
       generation: 0,
+      minStep: 1000,
     });
   }
 
@@ -211,29 +213,40 @@ class App extends Component {
           renderAll={this.state.renderAll}
           newObstacle={this.handleNewObstacle}
         />
-        <button
-          type="button"
-          onClick={this.state.animation ? this.pauseAnimation : this.startAnimation}
-        >
-          start/pause
-        </button>
         <span>Generation: {this.state.generation}</span>
-        <input
-          name="populationSize"
-          type="number"
-          step="10"
-          value={this.state.populationSize}
-          onChange={this.handleChange}
-        />
-        <button type="button" onClick={this.generatePopulation}>Generate new population</button>
-        <button type="button" onClick={this.showBest}>toggle population</button>
-        <input
-          name="mutationRate"
-          type="number"
-          step="0.005"
-          value={this.state.mutationRate}
-          onChange={this.handleChange}
-        />
+        <div>
+          <div>
+            <button
+              type="button"
+              onClick={this.state.animation ? this.pauseAnimation : this.startAnimation}
+            >
+              start/pause
+            </button>
+          </div>
+          <label>
+            Population size:
+            <input
+              name="populationSize"
+              type="number"
+              step="10"
+              value={this.state.populationSize}
+              onChange={this.handleChange}
+            />
+          </label>
+          <button type="button" onClick={this.generatePopulation}>Generate new population</button>
+          <button type="button" onClick={this.showBest}>toggle population</button>
+          <label>
+            Learning rate:
+            <input
+              name="mutationRate"
+              type="number"
+              step="0.005"
+              value={this.state.mutationRate}
+              onChange={this.handleChange}
+            />
+          </label>
+
+        </div>
       </div>
     );
   }

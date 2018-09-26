@@ -1,9 +1,13 @@
 .App {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
-.goal {
-  position: absolute;
-  background-color: yellow;
-  height: 5px;
-  width: 5px;
+button {
+  border: none;
+  padding: 1rem;
+  background-color: #0062ec;
+  color: white;
+  margin: 10px;
 }
