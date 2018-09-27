@@ -129,15 +129,9 @@ class App extends Component {
     this.dots = newDots.slice();
     // mutate
     this.mutateChildren();
-    // calculate new pos
-    let dotPositions = [];
-    for (let i = 0; i < this.state.populationSize; i++) {
-      dotPositions[i] = this.dots[i].pos;
-    }
 
     this.setState((state) => ({
       generation: state.generation + 1,
-      dotPositions,
     }), () => this.startAnimation());
   }
 
@@ -164,7 +158,6 @@ class App extends Component {
   }
 
   move = () => {
-    let dotPositions = [];
     for (let i = 0; i < this.state.populationSize; i++) {
       if (this.dots[i].brain.step > this.state.minStep) {
         this.dots[i].dead = true;
@@ -179,10 +172,8 @@ class App extends Component {
         });
       } else {
         this.dots[i].update();
-        dotPositions[i] = this.dots[i].pos;
       }
       this.dots[i].update();
-      dotPositions[i] = this.dots[i].pos;
     }
     this.setState({ dots: this.dots });
   }
@@ -190,6 +181,12 @@ class App extends Component {
   showBest = () => {
     this.setState((state) => ({
       renderAll: !state.renderAll,
+    }));
+  }
+
+  toggleParrots = () => {
+    this.setState((state) => ({
+      parrotify: !state.parrotify,
     }));
   }
 
@@ -212,6 +209,7 @@ class App extends Component {
           obstacles={this.state.obstacles}
           renderAll={this.state.renderAll}
           newObstacle={this.handleNewObstacle}
+          parrotify={this.state.parrotify}
         />
         <span>Generation: {this.state.generation}</span>
         <div>
@@ -245,7 +243,7 @@ class App extends Component {
               onChange={this.handleChange}
             />
           </label>
-
+          <button type="button" onClick={this.toggleParrots}>parrotify</button>
         </div>
       </div>
     );

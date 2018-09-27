@@ -104,9 +104,11 @@ class Canvas extends React.Component {
           this.props.renderAll ?
           dots.map((dot, i) => {
             const isBest = dot.isBest;
-            return <circle key={i} cx={dot.pos.x} cy={dot.pos.y} r="5" fill={isBest ? 'green' : 'blue'}/>
+            return this.props.parrotify ?
+              <image x={dot.pos.x} y={dot.pos.y} height="20" width="20" xlinkHref="https://i.imgur.com/1D8yxOo.gif" /> :       
+              <circle key={i} cx={dot.pos.x} cy={dot.pos.y} r="5" fill={isBest ? 'green' : 'blue'}/>
           }) :
-          <circle cx={dots[0].pos.x} cy={dots[0].pos.y} r="5" fill="green"/>
+          <circle cx={dots[0].pos.x} cy={dots[0].pos.y} r="50" fill="url(#image)"/>
         }
         <defs>
           <pattern id="smallGrid" width="10" height="10" patternUnits="userSpaceOnUse">

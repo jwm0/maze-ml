@@ -40,13 +40,10 @@ class Dot {
       } else if (Vector.distance(this.pos.x, this.pos.y, this.goal.x, this.goal.y) < 5) {
         this.reachedGoal = true;
       }
-      // } else if (pos.x< 600 && pos.y < 310 && pos.x > 0 && pos.y > 300) {//if hit obstacle
-      //   dead = true;
-      // }
     }
   }
 
-  //calculates the fitness
+  // calculates the fitness
   calculateFitness() {
     if (this.reachedGoal) {
       this.fitness = 1/16 + 10000/(this.brain.step * this.brain.step);
@@ -56,7 +53,7 @@ class Dot {
     }
   }
 
-  //clone it
+  // clone it
   getChild() {
     let child = new Dot(this.width, this.height, this.goal);
     child.brain = this.brain.clone();
