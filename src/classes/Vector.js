@@ -27,6 +27,13 @@ class Vector {
     this.y = Math.sin(direction) * magnitude;
   };
 
+  // limit magnitude
+  limit(mag) {
+    if (this.getMagnitude() > mag) {
+      this.setMagnitude(mag);
+    }
+  }
+
   // add two vectors together and return a new one
   add(v2) {
     return new Vector(this.x + v2.x, this.y + v2.y);

@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import inside from 'point-in-polygon';
+
 import Dot from './classes/Dot';
 import Canvas from './components/Canvas';
 import './App.css';
@@ -8,22 +10,37 @@ const HEIGHT = 400;
 const GOAL = { x: 50, y: 180 };
 
 class App extends Component {
-  state = {
-    generation: 0,
-    finished: false,
-    populationSize: 1000,
-    dotPositions: [],
-    minStep: 1000,
-  }
-  dots = [];
+  constructor(props) {
+    super(props);
 
-  componentDidMount() {
-    let dotPositions = [];
+    this.state = {
+      animation: false,
+      generation: 0,
+      mutationRate: 0.01,
+      populationSize: 100,
+      minStep: 1000,
+      renderAll: true,
+      obstacles: [],
+    }
+    this.dots = [];
+  }
+
+  handleNewObstacle = (obstacle) => {
+    this.setState(state => ({
+      obstacles: [...state.obstacles, obstacle],
+      minStep: 1000,
+    }));
+  }
+
+  generatePopulation = () => {
     for (let i = 0; i < this.state.populationSize; i++) {
       this.dots[i] = new Dot(WIDTH, HEIGHT, GOAL);
-      dotPositions[i] = this.dots[i].pos;
     }
-    this.setState({ dotPositions });
+    this.setState({
+      dots: this.dots,
+      generation: 0,
+      minStep: 1000,
+    });
   }
 
   calculateFitness() {
@@ -71,7 +88,7 @@ class App extends Component {
   //mutates all the brains of the babies
   mutateChildren() {
     for (let i = 1; i< this.dots.length; i++) {
-      this.dots[i].brain.mutate();
+      this.dots[i].brain.mutate(this.state.mutationRate);
     }
   }
 
@@ -102,11 +119,6 @@ class App extends Component {
     this.setBestDot();
     this.calculateFitnessSum();
 
-    // INFO
-    // getChild methos and mutation works
-    // something funky with selecting parents going on
-    // probably reference issue
-
     //the champion lives on
     newDots[0] = this.dots[this.bestDot].getChild();
     newDots[0].isBest = true;
@@ -117,31 +129,27 @@ class App extends Component {
     this.dots = newDots.slice();
     // mutate
     this.mutateChildren();
-    // calculate new pos
-    let dotPositions = [];
-    for (let i = 0; i < this.state.populationSize; i++) {
-      // console.log(this.dots[i].brain.id);
-      dotPositions[i] = this.dots[i].pos;
-    }
 
     this.setState((state) => ({
       generation: state.generation + 1,
-      dotPositions,
-    }))
+    }), () => this.startAnimation());
   }
 
   startAnimation = () => {
+    this.setState({ animation: true });
     this.animation = setInterval(() => {
       if (this.allDotsDead()) {
         clearInterval(this.animation);
         this.calculateFitness();
+        this.nextGeneration();
       }
 
       return this.move();
-    }, 25);
+    }, 10);
   }
 
   pauseAnimation = () => {
+    this.setState({ animation: false });
     clearInterval(this.animation);
   }
 
@@ -150,18 +158,43 @@ class App extends Component {
   }
 
   move = () => {
-    let dotPositions = [];
     for (let i = 0; i < this.state.populationSize; i++) {
-      // if (this.dots[i].brain.step > this.state.minStep) {
-      //   this.dots[i].dead = true;
-      // } else {
-      //   this.dots[i].update();
-      //   dotPositions[i] = this.dots[i].pos;
-      // }
+      if (this.dots[i].brain.step > this.state.minStep) {
+        this.dots[i].dead = true;
+      } else if (this.state.obstacles) {
+        const coordinates = [ this.dots[i].pos.x, this.dots[i].pos.y ];
+
+        this.state.obstacles.forEach((obstacle) => {
+          if (inside(coordinates, obstacle)) {
+            this.dots[i].dead = true;
+            return;
+          }
+        });
+      } else {
+        this.dots[i].update();
+      }
       this.dots[i].update();
-      dotPositions[i] = this.dots[i].pos;
     }
-    this.setState({ dotPositions });
+    this.setState({ dots: this.dots });
+  }
+
+  showBest = () => {
+    this.setState((state) => ({
+      renderAll: !state.renderAll,
+    }));
+  }
+
+  toggleParrots = () => {
+    this.setState((state) => ({
+      parrotify: !state.parrotify,
+    }));
+  }
+
+  handleChange = (e) => {
+    const { name, value } = e.target;
+    this.setState({
+      [name]: value,
+    })
   }
 
   render() {
@@ -170,13 +203,48 @@ class App extends Component {
         <Canvas
           width={WIDTH}
           height={HEIGHT}
-          dots={this.state.dotPositions}
+          dots={this.state.dots || []}
           goal={GOAL}
+          // TODO: change to state
+          obstacles={this.state.obstacles}
+          renderAll={this.state.renderAll}
+          newObstacle={this.handleNewObstacle}
+          parrotify={this.state.parrotify}
         />
-        <button type="button" onClick={this.startAnimation}>start</button>
-        <button type="button" onClick={this.pauseAnimation}>pause</button>
-        <span>{this.state.generation}</span>
-        <button type="button" onClick={this.nextGeneration}>new generation</button>
+        <span>Generation: {this.state.generation}</span>
+        <div>
+          <div>
+            <button
+              type="button"
+              onClick={this.state.animation ? this.pauseAnimation : this.startAnimation}
+            >
+              start/pause
+            </button>
+          </div>
+          <label>
+            Population size:
+            <input
+              name="populationSize"
+              type="number"
+              step="10"
+              value={this.state.populationSize}
+              onChange={this.handleChange}
+            />
+          </label>
+          <button type="button" onClick={this.generatePopulation}>Generate new population</button>
+          <button type="button" onClick={this.showBest}>toggle population</button>
+          <label>
+            Learning rate:
+            <input
+              name="mutationRate"
+              type="number"
+              step="0.005"
+              value={this.state.mutationRate}
+              onChange={this.handleChange}
+            />
+          </label>
+          <button type="button" onClick={this.toggleParrots}>parrotify</button>
+        </div>
       </div>
     );
   }
